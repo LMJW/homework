@@ -1,0 +1,10 @@
+[package]
+name = "hw02"
+version = "0.1.0"
+authors = ["LMJW <heysuperming@gmail.com>"]
+
+[dependencies]
+clippy = { version = "*", optional = true }
+
+[features]
+default = []
