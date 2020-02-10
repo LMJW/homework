@@ -18,7 +18,9 @@ pub enum Curio {
 impl Curio {
     pub fn generate_n(n: usize) -> Vec<Curio> {
         let mut acc = Vec::new();
-        for _ in 0..n { acc.push(Curio::generate()); }
+        for _ in 0..n {
+            acc.push(Curio::generate());
+        }
         acc
     }
 
@@ -27,8 +29,10 @@ impl Curio {
             0 => Curio::rand_chest(),
             1 => Curio::rand_spike_trap(),
             2 => Curio::rand_food(),
-            3 => Curio::IronMaiden(Box::new(Curio::generate_sub_curio()),
-                                   ((rand::random::<u32>() % MAX_TRAP_VAL) + 1) as i32),
+            3 => Curio::IronMaiden(
+                Box::new(Curio::generate_sub_curio()),
+                ((rand::random::<u32>() % MAX_TRAP_VAL) + 1) as i32,
+            ),
             4 => Curio::FallenAdventurer(Box::new(Curio::generate_sub_curio())),
             _ => unreachable!(),
         }

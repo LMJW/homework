@@ -11,13 +11,31 @@ pub struct Hall {
 impl Hall {
     pub fn new() -> Hall {
         // TODO: Implement
-        unimplemented!();
+        // use dummy value for the initial value
+        Hall {
+            left: Rc::new(RefCell::new(Room {
+                name: "".to_string(),
+                contents: vec![],
+                halls: vec![],
+                wumpus: false,
+            })),
+            right: Rc::new(RefCell::new(Room {
+                name: "".to_string(),
+                contents: vec![],
+                halls: vec![],
+                wumpus: false,
+            })),
+        }
     }
 
     /// Given a Room `room`, find the room at the other end of Hall `self`.
     pub fn other(&self, room: &Room) -> Rc<RefCell<Room>> {
         // TODO: Implement
-        unimplemented!();
-    }
+        let lr = &self.left.borrow().name;
 
+        if room.name == *lr {
+            return self.right.clone();
+        }
+        self.left.clone()
+    }
 }

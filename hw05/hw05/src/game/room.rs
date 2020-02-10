@@ -1,6 +1,6 @@
-use std::rc::Rc;
 use std::cell::RefCell;
 use std::mem;
+use std::rc::Rc;
 
 use super::curio::Curio;
 use super::hall::Hall;
@@ -25,6 +25,20 @@ impl Room {
 
     pub fn neighbors_string(&self) -> String {
         // TODO: Implement
-        unimplemented!();
+        let mut ret = String::new();
+
+        let cur_room = &self.name;
+        for h in &self.halls {
+            let n = &h.left.borrow().name;
+            let r = &h.right.borrow().name;
+            if n == cur_room {
+                ret.push_str(r.as_str());
+            } else {
+                ret.push_str(n.as_str());
+            }
+            ret.push_str(" ");
+        }
+
+        ret
     }
 }

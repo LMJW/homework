@@ -5,4 +5,4 @@ authors = ["CIS 198 <cis198@cis.upenn.edu>"]
 
 [dependencies]
 rand = "0.3"
-rustc-serialize = "0.3"
+rustc-serialize = "0.3.24"

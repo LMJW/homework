@@ -1,7 +1,7 @@
 use std::io::{self, Write};
 
-use game::player::Player;
 use game::player::Command;
+use game::player::Player;
 
 #[derive(Debug)]
 enum Error {
@@ -12,8 +12,11 @@ enum Error {
 pub fn game_loop(mut player: Player) {
     loop {
         // Print a user input prompt.
-        println!("{}\n\nExits are: {}.\n\nWhat wouldst thou deau?",
-                 player, player.location.borrow().neighbors_string());
+        println!(
+            "{}\n\nExits are: {}.\n\nWhat wouldst thou deau?",
+            player,
+            player.location.borrow().neighbors_string()
+        );
         print!("> ");
         io::stdout().flush().unwrap();
 
@@ -33,13 +36,28 @@ pub fn game_loop(mut player: Player) {
                     break;
                 } else if let Ok(cmd) = parse {
                     if let Err(_) = player.act(cmd) {
-                        println!("I don't know how to {}!", buf.trim());
+                        println!("know how to {}!", buf.trim());
                     }
                 }
                 if player.hp <= 0 {
-                    println!("You try in vain to shovel more wall chicken into \
-                              your mouth, but you've been impaled by too many spikes or Wumpi :(");
+                    println!(
+                        "You try in vain to shovel more wall chicken into \
+                              your mouth, but you've been impaled by too many spikes or Wumpi :("
+                    );
                     println!("You Lose!");
+                    return;
+                }
+                if player.has_won() {
+                    println!("You killed scary Wumpus!!!")
+                    println!(
+                        "Congratulations! You have freed this castle from \
+                    its terrible and malodorous curse"
+                    );
+                    println!(
+                        "All the land rejoices in your honor. You are \
+                    crowned as the exalted ruler for the people \
+                    whose lives you have saved."
+                    );
                     return;
                 }
             }
