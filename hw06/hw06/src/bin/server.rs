@@ -1,32 +1,38 @@
+extern crate bbs;
 extern crate hyper;
 extern crate rustc_serialize;
-extern crate bbs;
+extern crate tokio;
 
 use std::fs::{File, OpenOptions};
 use std::io::{self, Read, Write};
-use std::net::TcpStream;
 
-use hyper::server::{Request, Response, Server};
-use hyper::status::StatusCode;
-use rustc_serialize::json;
+use std::net::{IpAddr, Ipv4Addr, SocketAddr};
+use tokio::prelude::*;
+
 use bbs::Message;
-use bbs::{SERVER_ADDR, BOT_ADDR, HTML_DATA, HTML_HEADER, HTML_FOOTER};
+use bbs::{BOT_ADDR, HTML_DATA, HTML_FOOTER, HTML_HEADER, SERVER_ADDR};
+use hyper::server::Server;
+use hyper::service::{make_service_fn, service_fn};
+use hyper::{Body, Method, Request, Response, StatusCode};
+use rustc_serialize::json;
 
 // Returns val from Ok(val) or sets the response to return an InternalServerError.
 macro_rules! try_or_server_err {
-    ($expr:expr, $res:expr) => (match $expr {
-        Ok(val) => val,
-        Err(err) => {
-            println!("{:?}", err);
-            *($res).status_mut() = StatusCode::InternalServerError;
-            return;
+    ($expr:expr, $res:expr) => {
+        match $expr {
+            Ok(val) => val,
+            Err(err) => {
+                println!("{:?}", err);
+                *($res).status_mut() = StatusCode::InternalServerError;
+                return;
+            }
         }
-    })
+    };
 }
 
-fn req_handler(mut req: Request, mut res: Response) {
-    match req.method {
-        hyper::Get => {
+async fn req_handler(req: Request<Body>) -> Result<Response<Body>, hyper::Error> {
+    match *req.method() {
+        Method::GET => {
             // Read the files [HTML_HEADER, HTML_DATA, HTML_FOOTER] into buf.
             // If HTML_DATA doesn't exist, it should be skipped without failure.
             // Use `try_or_server_err!(expression, res)` instead of `try!(expression)` in
@@ -35,24 +41,33 @@ fn req_handler(mut req: Request, mut res: Response) {
             // TODO
 
             // And return buf as the response.
-            *res.status_mut() = StatusCode::Ok;
-            res.send(&buf.as_bytes()).unwrap();
-        },
-        hyper::Post => {
+            let ret = Response::new(Body::from(buf));
+            Ok(ret)
+        }
+        Method::POST => {
             // Read the message out of the `req` into a buffer, handle it, and respond with Ok.
             // TODO
-        },
-        _ => *res.status_mut() = StatusCode::ImATeapot,
+            unimplemented!()
+        }
+        _ => {
+            let mut res = Response::new(Body::empty());
+            *res.status_mut() = StatusCode::IM_A_TEAPOT;
+            Ok(res)
+        }
     }
 }
 
-fn main() {
+#[tokio::main]
+async fn main() {
     println!("Listening on {}.", SERVER_ADDR);
-    match Server::http(SERVER_ADDR) {
-        Ok(server) => match server.handle(req_handler) {
-            Ok(_) => (),
-            Err(e) => println!("{:?}", e),
-        },
-        Err(e) => println!("{:?}", e),
+
+    let addr: SocketAddr = (*SERVER_ADDR).parse::<SocketAddr>().unwrap();
+
+    let service = make_service_fn(|_| async { Ok::<_, hyper::Error>(service_fn(req_handler)) });
+
+    let server = Server::bind(&addr).serve(service);
+
+    if let Err(e) = server.await {
+        eprintln!("server error :{}", e);
     }
 }

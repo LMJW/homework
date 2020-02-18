@@ -1,15 +1,15 @@
+extern crate bbs;
 extern crate hyper;
 extern crate rustc_serialize;
-extern crate bbs;
 
 use std::io::Read;
 use std::net::TcpListener;
 
+// use hyper::header::UserAgent;
 use hyper::Client;
-use hyper::header::UserAgent;
 
-use bbs::{BOT_ADDR, HTML_ADDR};
 use bbs::UserClient;
+use bbs::{BOT_ADDR, HTML_ADDR};
 
 fn main() {
     // Create a bot user.

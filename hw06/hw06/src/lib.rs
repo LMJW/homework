@@ -1,11 +1,16 @@
-extern crate rustc_serialize;
+extern crate core;
 extern crate hyper;
+extern crate rustc_serialize;
 
-use std::io::Read;
+use core::task::Poll;
+
 use rustc_serialize::json;
 use rustc_serialize::{Encodable, Encoder};
+use std::io::Read;
+use std::str::FromStr;
 
-use hyper::status::StatusCode;
+use hyper::client::{Client, HttpConnector};
+use hyper::{Body, StatusCode, Uri};
 
 pub const SERVER_ADDR: &'static str = "127.0.0.1:1980";
 pub const BOT_ADDR: &'static str = "127.0.0.1:1981";
@@ -14,7 +19,6 @@ pub const HTML_ADDR: &'static str = "http://127.0.0.1:1980";
 pub const HTML_DATA: &'static str = "data/index.html";
 pub const HTML_HEADER: &'static str = "html/header.html";
 pub const HTML_FOOTER: &'static str = "html/footer.html";
-
 
 #[derive(Debug, RustcDecodable, RustcEncodable)]
 pub struct Message {
@@ -34,7 +38,7 @@ impl Message {
 pub struct UserClient {
     username: String,
     server_addr: String,
-    client: hyper::Client,
+    client: Client<HttpConnector, Body>,
 }
 
 impl UserClient {
@@ -42,16 +46,16 @@ impl UserClient {
         UserClient {
             username: username,
             server_addr: server_addr,
-            client: hyper::Client::new(),
+            client: Client::new(),
         }
     }
 
     // TODO: Implement send_msg
 
-    pub fn get_content(&self) -> hyper::Result<(StatusCode, String)> {
-        let mut response = try!(self.client.get(&self.server_addr).send());
-        let mut buf = String::new();
-        response.read_to_string(&mut buf).unwrap();
-        Ok((response.status, buf))
+    pub async fn get_content(&self) -> Result<(), hyper::Error> {
+        let uri = Uri::from_str(&self.server_addr.as_str()).unwrap();
+        let res = self.client.get(uri).await?;
+        println!("{}", res.status());
+        Ok(())
     }
 }

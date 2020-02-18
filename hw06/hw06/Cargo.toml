@@ -2,8 +2,9 @@
 name = "bbs"
 version = "0.1.0"
 authors = ["CIS 198 <cis198@seas.upenn.edu>"]
+edition = "2018"
 
 [dependencies]
-hyper = "0.7.2"
-rustc-serialize = "0.3"
-
+hyper = "0.13.2"
+rustc-serialize = "0.3.24"
+tokio = { version = "0.2", features = ["full"] }
